@@ -36,7 +36,7 @@ On CentOS, Fedora or RHEL
 
 On Debian or Ubuntu:
 
-* sudo apt install make texlive
+* sudo apt install make texlive-full
 
 On openSUSE
 
