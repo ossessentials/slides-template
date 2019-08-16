@@ -1,0 +1,199 @@
++\section{systemd for Administrators}
+
+
+\begin{frame}
+   {What is systemd}
+
+	\textbf{systemd} is the latest evolution in 
+	system startup programs for \textbf{Linux}. \\
+		The main objectives are: 
+	\begin{itemize}
+		\item startup or system manager 
+			\begin{itemize}
+			\item runs as "init" or "pid 1"
+			\item launched by the kernel during initialization
+			\item starts the rest of the system
+			\end{itemize}
+		\item session or service manager 
+			\begin{itemize}
+			\item start, stop and status of background processes
+			\item SysV init.d script compatible
+			\end{itemize}
+	\end{itemize}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{service control commands}
+	\textbf{systemd} has a control program \textbf{systemctl} to manage
+	the background processes and services it starts. Some of the options are: 
+	\begin{itemize}
+	\item \textbf{systemctl}  outputs a list of all "units" and their state
+	\item \textbf{systemctl -t services} list the "service units" and their state
+	\item \textbf{systemctl status cups} show detailed status for "cups.service" \\
+		(the .service is default other types mus be specified)
+	\item \textbf{systemctl start cups} start the "cups.service" now 
+	\item \textbf{systemctl stop cups} stop the "cups.service" now
+	\item \textbf{systemctl enable cups} start the "cups.service" at boot time
+	\item \textbf{systemctl disable cups} do not auto start this service at boot time
+	\end{itemize}
+	Please consult \textbf{man systemctl} for additional details. 
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{\textbf{systemd} configuration directories}
+	systemd has a three tiered configuration, if one of the 
+	tiers is not present the next highest priority files is 
+	used. 
+  	\begin{itemize} 
+        \item Configuration files/directories, priority lowest to highest.
+                \begin{itemize}
+                \item vendor/packager
+                \item dynamic
+                \item administrator
+                \end{itemize}
+        \end{itemize}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{The typical directory locations} 
+	\begin{itemize}
+	\item the vendor supplied configuration file is at: \\
+		\filelink{/lib/systemd/system/<service-name>.service}  \\
+			or \\
+		\filelink{/usr/lib/systemd/system/<service.name>.service} \\
+			or \\
+		\filelink{/usr/lib/systemd/system/<service-name>.d/*.conf}
+
+	\item temporary files created at runtime:  \\
+		\filelink{/run/systemd/} 
+
+	\item local administrator configuration files:  \\
+		\filelink{/etc/systemd/system}	
+	\end{itemize}
+\end{frame}
+
+\cprotect\note{ 
+
+} 
+
+\begin{frame} 
+	{configuration file types}
+
+	\textbf{systemd} has several types of configuration elements, called \textbf{units}.
+	   \begin{longtable}{| m{5em} | m{30em} | }
+                \caption{some of the unit types} \\
+                \hline
+		   \textbf{Type}                        &
+                \textbf{Description}                    \\
+                \hline
+                service                                &
+               which start and control daemons and the processes they consist of  \\
+                \hline
+		   socket &
+                local IPC  or network socket      \\
+                \hline
+		target &
+		group of units or boot up points \\
+		\hline
+		 device &
+		 exposes kernel devices to systemd, allows device based activation \\
+		   \hline
+		   mount &
+		   control the mount points \\
+		   \hline
+		   automount &
+		   provides on demand mounting of filesystems \\
+		   \hline
+		   timer  &
+		   trigger activation of other units based on timer\\
+		   \hline
+		   swap &
+		   mount swap files \\
+		   \hline
+		   path & 
+		   activate other units if filesystem objects change \\
+		   \hline 
+		   slice &
+		   group units for easier management \\
+		   \hline
+		   scope &
+		   like service units but manage foreign processes as well \\
+		   \hline
+		   
+
+        \end{longtable}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{"Unit" documentaion}
+ \begin{longtable}{| m{5em} | m{30em} | }
+                \caption{unit type man pages} \\
+                \hline
+                   \textbf{Type}                        &
+		\textbf{man page}                    \\
+                \hline
+                service                                &
+	       systemd.service(5) \\
+                \hline
+                   socket &
+		systemd.socket(5), daemon(7)     \\
+                \hline
+                target &
+		systemd.target(5) \\
+                \hline
+                 device &
+		 systemd.device(5) \\
+                   \hline
+                   mount &
+		   systemd.mount(5) \\
+                   \hline
+                   automount &
+		   systemd.automount(5) \\
+                   \hline
+                   timer  &
+		   systemd.timer(5) \\
+                   \hline
+                   swap &
+		   systemd.swap(5) \\
+                   \hline
+                   path &
+		   systemd.path(5) \\
+                   \hline
+                   slice &
+                   systemd.slice(5) \\
+                   \hline
+                   scope &
+		   systemd.scope(5) \\
+                   \hline
+		   "see also" &
+		   systemd.special(7), systemd.units(5), systemd-system.conf(5) \\ 
+		   \hline
+
+
+        \end{longtable}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+

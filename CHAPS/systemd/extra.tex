@@ -1,0 +1,243 @@
+\section{systemd optional features} 
+
+\begin{frame}
+	{systemd optional features}
+ 
+\begin{itemize}
+                        \item   systemd-delta
+                        \item   systemd-timedated
+                        \item   systemd-timesyncd
+                        \item   systemd-sysctl
+                        \item   systemd-networkd
+                \end{itemize}
+	This is a small sampling of the optional features available with \textbf{systemd}.
+	See the official home page at: \\
+	\url{https://www.freedesktop.org/wiki/Software/systemd/} \\
+	for more information.
+\end{frame} 
+
+\cprotect\note{ 
+
+}
+
+
+\begin{frame}
+	{systemd-delta}
+
+	This command/feature \textbf{systemd-delta} is an 
+	essential command for administrators, it finds the configuration 
+	files that are: 
+	\begin{itemize}
+		\item overriden
+		\item masked
+		\item equivalent
+		\item redirected
+		\item extended
+		\item unchanged
+	\end{itemize} 
+
+\end{frame}
+
+\cprotect\note{
+
+	}
+
+\begin{frame} 
+	{systemd-timedated}
+
+	\begin{itemize} 
+		\item  system service that terminates when unneeded
+		\item  user interface \textbf{timedatectl}
+		\item  change system clock and timezone 
+		\item  enable and disable NTP service 
+	\end{itemize}
+
+	The \textbf{systemd-timedated} will launch an NTP client when the 
+	boolean \textbf{set-ntp true} is set, assuming the previous state 
+	was \textbf{false}.\textbf{systemd-timedated} will attempt to launch:
+	\begin{itemize} 
+		\item \textbf{chronyd.service}
+		\item \textbf{ntpd.service} 
+		\item \textbf{systemd-timesyncd.service}
+	\end{itemize}
+
+	The content of the list and order can be altered by altering the \\
+	\textbf{\$SYSTEMD\_TIMEDATED\_NTP\_SERVICES} environment variable. 
+
+\end{frame}
+
+\cprotect\note{
+
+	}
+
+
+\begin{frame}
+	{systemd-timesyncd.service}
+
+	\textbf{systemd-timesyncd.service} is a time synchronization 
+	client with the following properties: 
+	\begin{itemize}
+		\item client only, no server functions
+		\item uses \textbf{SNTP} protocol
+			\begin{itemize}
+				\item "steps" time in to synchronization
+				\item uses one time source at a time
+			\end{itemize}
+		\item configuration files is: \filelink{/etc/systemd/timesyncd.conf}
+	\end{itemize} 
+
+\end{frame}
+
+\cprotect\note{
+	}
+
+
+\begin{frame}
+	{systemd-sysctl} 
+
+	\textbf{systemd-sysctl} applies kernel parameters 
+	early in the boot sequence.  
+	\begin{itemize} 
+		\item applies the \textbf{.conf} file in \filelink{/etc/sysctl.d} directory
+		\item if the original \filelink{/etc/sysctl.conf} is desired 
+			create a soft link into the \filelink{/etc/sysctl.d} directory
+		\end{itemize}
+
+\end{frame}
+
+\cprotect\note{
+
+	}
+
+\begin{frame} 
+	{systemd-networkd}
+
+	\textbf{systemd-networkd} is an optional component that manages networks.
+	\begin{itemize}
+		\item consistant configuration files across distributions
+		\item does not read the historical network configuration files
+		\item configuration files in "INI" format 
+		\item main configuration files: 
+		\filelink{/{lib,run,etc}/systemd/network/} directories see: 
+			\textbf{systemd.network(5)} 
+		\item low level link settings are independently set
+			see \textbf{systemd.link(5)}
+		\item non-physical devices are defined in:
+			\textbf{systemd.netdev(5)} files
+		\end{itemize}
+
+		The default configuration will start a dhcp client on the 
+		interfaces at boot time. \\
+
+		Debian and friends have a tool that generates
+		either \textbf{NetworkManager} or \textbf{systemd.networkd}
+		configuration files from a "yaml" input file.
+
+
+\end{frame} 
+
+\cprotect\note{
+
+	}
+
+\begin{frame} 
+	{test drive systemd-networkd} 
+	
+	Assuming that \textbf{NetworkManager} is the active configuration 
+	tool, testing \textbf{systemd-networkd} only takes a few steps for
+	a \textbf{DHCP} example. 
+	\begin{itemize} 
+		\item create a configuration file
+		\item switch off \textbf{netplan} (if applicable)
+		\item \textbf{disable} NetworkManager
+		\item \textbf{enable} systemd-networkd 
+		\item reboot (clears any temporary configs) 
+	\end{itemize} 
+
+		Test the new configuration and explore the 
+		networking options in \textbf{systemd-networkd} 
+
+
+\end{frame}
+
+\cprotect\note{
+
+	}
+\begin{frame}
+	{create a config file} 
+	\begin{itemize}
+		\item first record the name of the adapter:
+	\begin{raw}
+$ ip -br address
+lo               UNKNOWN    127.0.0.1/8 ::1/128 
+enp1s0           UP         192.168.122.42/24 fe80::c2dd:87d:5eb3:9ca5/64 
+	\end{raw}
+		\item build a config file in the "local administrator"
+			directory:
+	\begin{raw}
+$ cat  /etc/systemd/network/20-dhcp.network 
+[Match]
+Name=enp*
+
+[Network]
+DHCP=yes
+	\end{raw} 
+		\end{itemize}
+
+\end{frame}
+
+\cprotect\note{
+
+	}
+
+\begin{frame}
+	{switch off netplan}
+
+	For this example disable \textbf{netplan} if it is enabled. 
+
+	\begin{itemize}
+		\item rename the primary netplan input file directory
+		\begin{raw}
+# mv /etc/netplan /etc/netplan-off
+		\end{raw}
+
+		\end{itemize}
+
+\end{frame}
+
+\cprotect\note{
+
+	}
+
+\begin{frame}
+	{switch network management and reboot} 
+
+	Set the automatic start on \textbf{systemd-networkd}
+	\begin{itemize}
+		\item disable NetworkManager
+		\begin{raw}
+$ sudo  systemctl disable NetworkManager 
+		\end{raw}
+		\item enable systemd-networkd
+		\begin{raw}
+$ sudo systemctl enable systemd-networkd
+		\end{raw}
+		\item reboot
+		\begin{raw}
+$ sudo systemctl reboot
+		\end{raw}
+
+	\end{itemize}
+\end{frame}
+
+	\cprotect\note{
+
+		}
+
+
+
+
+	
+
+	 
+

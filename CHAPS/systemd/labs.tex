@@ -1,0 +1,457 @@
+\clearpage\section{Labs}\begin{Lab}
+
+\begin{exe} {systemd}
+
+	There is a high probability that your system has \textbf{systemd}
+	installed and running. If your system does not then this exercise 
+	set will not function.
+
+	This exercise is going to create several configuration files 
+	to illustrate how \textbf{systemd} organizes its configuration. 
+
+	Normally administrator added services would be added to \filelink{etc/systemd} 
+	directory but in this exercise we are going to create two levels of 
+	configuration, the "vendor" and "administration" files.  
+
+	Looking at the man pages to determine the location of the 
+	\textbf{systemd} configuration files can be a little complex as \textbf{systemd}
+	looks in various places  for its files. Taking a practical 
+	approach, we will look at an existing service to determine where 
+	your distro has placed the files. 
+	
+	
+      \begin{enumerate}
+	      \item An easy way to determine where the \textbf{systemd}
+		    configuration files are is to look. \\
+		      Locate the configuration files for \textbf{cups} and/or
+		      \textbf{sshd}.
+		 	\begin{raw}
+# systemctl status sshd
+			\end{raw}
+			The output should be similar to: 
+			\begin{raw}
+sshd.service - OpenSSH server daemon
+   Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: disabled)
+   Active: active (running) since Sat 2019-08-10 06:27:29 CDT; 2 days ago
+     Docs: man:sshd(8)
+           man:sshd_config(5)
+ Main PID: 687 (sshd)
+    Tasks: 1 (limit: 2356)
+   Memory: 4.5M
+   CGroup: /system.slice/sshd.service
+           |_687 /usr/sbin/sshd -D -oCiphers=aes256-gcm@openssh.com,chacha20-poly1305@openssh.com
+	
+..... some text removed .... 
+			
+			\end{raw}
+	Notice the line beginning with \textbf{Loaded:} as it is 
+		      pointing to the initial configuration file 
+		      as supplied by the packager. This example
+		      shows the directory \filelink{/usr/lib/systemd/system} 
+		     is the directory the packager used.  \\  
+		   
+		      Record the directory name for future use. 
+		\item Copy the default configuration to a user home directory. 
+			\begin{raw}
+# cp /usr/lib/systemd/system/sshd.service /home/student/sshd.service
+			\end{raw}
+
+		\item the existing file should look a lot like: 
+			\begin{raw}
+[root@rt student]# cat sshd.service 
+[Unit]
+Description=OpenSSH server daemon
+Documentation=man:sshd(8) man:sshd_config(5)
+After=network.target sshd-keygen.target
+Wants=sshd-keygen.target
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/crypto-policies/back-ends/opensshserver.config
+EnvironmentFile=-/etc/sysconfig/sshd
+ExecStart=/usr/sbin/sshd -D $OPTIONS $CRYPTO_POLICY
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
+
+		\end{raw}
+		\item Rename the copy of the sshd.service file to test\_sshd.service 
+		\item Alter the contents of test\_sshd.service to match the following: 
+			\begin{raw}
+# cat /usr/lib/systemd/system/test_sshd.service
+
+[Unit]
+Description=test 
+After=network.target sshd-keygen.target
+Wants=sshd-keygen.target
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/crypto-policies/back-ends/opensshserver.config
+EnvironmentFile=-/etc/sysconfig/sshd
+ExecStart=/usr/sbin/sshd -D $OPTIONS $CRYPTO_POLICY -p 4222
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
+			\end{raw}
+
+		\item The service name is the same as the file name. Copy 
+			the customized file back to the default directory. 
+		\begin{raw}
+# cp test_sshd.service /usr/lib/systemd/system/
+		\end{raw}
+	\item Tell \textbf{systemd} to re-read its configuration files.
+		\begin{raw}
+# systemctl daemon-reload
+		\end{raw}
+	\item The service should be ready to start. Start the new service 
+		and request its status.
+		\begin{raw}
+# systemctl start  test_sshd
+
+# systemctl status test_sshd
+test_sshd.service - test
+   Loaded: loaded (/usr/lib/systemd/system/test_sshd.service; disabled; vendor preset: disabled)
+   Active: active (running) since Mon 2019-08-12 10:50:24 CDT; 2s ago
+ Main PID: 5449 (sshd)
+    Tasks: 1 (limit: 2356)
+   Memory: 1.2M
+   CGroup: /system.slice/test_sshd.service
+           |_5449 /usr/sbin/sshd -D -oCiphers=aes256-gcm@openssh.com,chacha20-poly1305@openssh.com
+
+Aug 12 10:50:24 rt.example.com systemd[1]: Starting test...
+Aug 12 10:50:24 rt.example.com sshd[5449]: Server listening on 0.0.0.0 port 4222.
+Aug 12 10:50:24 rt.example.com sshd[5449]: Server listening on :: port 4222.
+Aug 12 10:50:24 rt.example.com systemd[1]: Started test.
+		\end{raw}
+	\item To enable the new service at boot time: 
+		\begin{raw}
+# systemctl enable test_sshd
+		\end{raw} 
+	\end{enumerate}
+\end{exe} 
+
+
+\begin{exe}
+	{Test a "Drop-In" configuration in the admin directory}
+
+	This exercise will modify the newly created service and will the 
+	\textbf{local admin} directory \textbf{/etc/systemd/system}. 
+	One of the advantages of using the local admin directory is 
+	changes to the service file added by the vendor or 
+	packager could be made during update, overwritten local customizations.
+
+	\begin{enumerate} 
+		\item
+		A Drop-In file can be a single file or a directory 
+			of many files, this 
+			example uses a directory.
+		Create the new directory for the dropin file.
+		\begin{raw}
+# mkdir /etc/systemd/system/test_sshd.service
+		\end{raw}
+
+		\item 
+		The Drop-In file will add to the existing service file. Sometimes 
+			if a value is already defined it must be cleared before 
+			changes can occur, the actual ExecStart command is one. Create 
+			dropin file with the following. The port number was changed. 
+
+		\begin{raw}
+# cat /etc/systemd/system/test_sshd.service.d/00-first.conf
+
+[Service]
+ExecStart=
+ExecStart=/usr/sbin/sshd -D $OPTIONS $CRYPTO_POLICY -p4242
+		\end{raw}
+
+		\item 
+		Inform systemd that the configuration has been changed, then restart the service.
+		\begin{raw}
+# systemctl daemon-reload 
+# systemctl restart test_sshd 
+		\end{raw} 
+
+		\item 
+		The test\_sshd service should be listening on a new port. 
+		\begin{rawfootnotesize} 
+[root@rt system]# systemctl status   test_sshd
+ test_sshd.service - test
+   Loaded: loaded (/usr/lib/systemd/system/test_sshd.service; disabled; vendor preset: disabled)
+  Drop-In: /etc/systemd/system/test_sshd.service.d
+           |-00-first.conf
+   Active: active (running) since Mon 2019-08-12 11:28:32 CDT; 8s ago
+ Main PID: 5733 (sshd)
+    Tasks: 1 (limit: 2356)
+   Memory: 1.0M
+   CGroup: /system.slice/test_sshd.service
+           |-5733 /usr/sbin/sshd -D -oCiphers=aes256-gcm@openssh.com,chacha20-poly1305@openssh.com
+Aug 12 11:28:32 rt.example.com systemd[1]: Stopped test.
+Aug 12 11:28:32 rt.example.com systemd[1]: Starting test...
+Aug 12 11:28:32 rt.example.com sshd[5733]: Server listening on 0.0.0.0 port 4242.
+Aug 12 11:28:32 rt.example.com sshd[5733]: Server listening on :: port 4242.
+Aug 12 11:28:32 rt.example.com systemd[1]: Started test.
+		\end{rawfootnotesize}
+
+
+
+		\end{enumerate}
+		\end{exe}
+
+
+\begin{exe}{Locating the customizations}
+	This exercise looks at determining which configuration 
+	files are active for a \textbf{systemd unit}. This exercise assumes 
+	the successful completion of the previous exercises. 
+
+	\begin{enumerate}
+		\item the \textbf{systemctl status test\_vsftpd} command will 
+		show the following: 
+	\begin{raw}
+# systemctl status test_sshd
+	\end{raw}
+
+	The output will show:
+		\begin{itemize}
+		\item service has a vendor default of "enabled" or "disabled"
+		\item service has been manually "enabled" or "disabled"
+		\item what the name and location of the vendor supplied config file
+		\item the Drop-In directory and associated files
+		\item limits and cgroup information 
+		\item a few lines of the log associated with this service
+		\end{itemize}
+The output from the test system: 
+		\begin{raw}
+test_sshd.service - test
+   Loaded: loaded (/usr/lib/systemd/system/test_sshd.service; disabled; vendor preset: disabled)
+  Drop-In: /etc/systemd/system/test_sshd.service.d
+           |-00-first.conf, 60-second.conf
+   Active: active (running) since Wed 2019-08-14 08:44:50 CDT; 2s ago
+ Main PID: 2629 (sshd)
+    Tasks: 1 (limit: 3)
+   Memory: 2.2M
+   CGroup: /system.slice/test_sshd.service
+           |-2629 /usr/sbin/sshd -D -oCiphers=aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,aes256-ct>
+
+Aug 14 08:44:50 rt.example.com systemd[1]: Starting test...
+Aug 14 08:44:50 rt.example.com sshd[2629]: Server listening on 0.0.0.0 port 4242.
+Aug 14 08:44:50 rt.example.com sshd[2629]: Server listening on :: port 4242.
+Aug 14 08:44:50 rt.example.com systemd[1]: Started test.
+		\end{raw}
+
+		\item It would be tedious to check every service
+			for Drop-In files. \textbf{systemd-delta} 
+			is designed to find overridden configuration 
+			files. The output is a little wide so 
+			redirecting it to a file may be helpful. \\
+			
+			\begin{raw}
+# systemd-delta > /tmp/delta.txt 
+			\end{raw}
+
+			display the output:
+			\begin{rawscriptsize}
+# cat /tmp/delta
+
+[EQUIVALENT] /etc/systemd/system/default.target -> /usr/lib/systemd/system/default.target
+[EXTENDED]   /etc/systemd/system/foo.service -> /etc/systemd/system/foo.service.d/00-foo.conf
+[EXTENDED]   /usr/lib/systemd/system/systemd-udev-trigger.service -> 
+				/usr/lib/systemd/system/systemd-udev-trigger.service.d/systemd-udev-trigger-no-reload.conf
+[EXTENDED]   /usr/lib/systemd/system/test_sshd.service -> /etc/systemd/system/test_sshd.service.d/00-first.conf
+[EXTENDED]   /usr/lib/systemd/system/test_sshd.service -> /etc/systemd/system/test_sshd.service.d/60-second.conf
+
+5 overridden configuration files found.
+
+			\end{rawscriptsize}
+(Note, above edited to fit page) 
+	\end{enumerate}
+
+
+
+\end{exe}
+
+\begin{exe}{time synchronization with systemd-timedated}
+
+	When synchronization of time is required or when the time client
+	client changes the operation must be verified. This exercise will determine
+	if time synchronization is active, which client is being used and 
+	if necessary 
+	set the client to be systemd-timedated
+
+	\begin{enumerate} 
+	\item determine which time clients are installed
+\begin{raw}
+# rpm -qa | grep -e ntp -e chrony -e syncd
+yast2-ntp-client-4.1.8-lp151.1.1.noarch
+chrony-3.2-lp151.8.6.x86_64
+\end{raw}
+	This indicates the package \textbf{chrony} is installed. 
+
+	\item 
+	Check the current status with \textbf{timedatectl} 
+	\begin{raw}
+# timedatectl 
+
+      Local time: Wed 2019-08-14 13:00:06 EDT
+  Universal time: Wed 2019-08-14 17:00:06 UTC
+        RTC time: Wed 2019-08-14 17:45:31
+       Time zone: America/Toronto (EDT, -0400)
+ Network time on: no
+NTP synchronized: no
+ RTC in local TZ: no
+
+	\end{raw}
+	
+	\item
+
+	Disable \textbf{chrony}.
+	\begin{raw}
+# mv /etc/chrony.conf  /etc/chrony.conf-off 
+	\end{raw}
+
+	\item Check if any of the ntp clients are running and stop them.
+		\begin{raw}
+# systemctl | grep -e ntp -e chrony -e syncd
+chronyd.service    loaded active running   NTP client/server
+
+# systemctl | grep -e ntp -e chrony -e syncd
+		\end{raw}
+		\item enable ntp client with timedatectl
+		\begin{raw}
+# timedatectl set-ntp on
+		\end{raw}
+
+	\item check the status of time synchronization
+		\begin{raw}
+# timedatectl 
+		\end{raw}
+
+		\begin{raw}
+      Local time: Wed 2019-08-14 14:02:47 EDT
+  Universal time: Wed 2019-08-14 18:02:47 UTC
+        RTC time: Wed 2019-08-14 18:02:46
+       Time zone: America/Toronto (EDT, -0400)
+ Network time on: yes
+NTP synchronized: yes
+ RTC in local TZ: no
+		\end{raw}
+			
+	\item check which ntp client was started by timedatectl
+		\begin{raw}
+# systemctl | grep -e ntp -e chrony -e syncd
+systemd-timesyncd.service  loaded active running   Network Time Synchronization                                               \end{raw}
+
+	\end{enumerate}
+
+	\end{exe}
+
+	\begin{exe}{switch the network configuration to use systemd-networkd}
+
+	\begin{enumerate}
+		\item
+		Check the current configuration to verify which network management tools 
+		are being used. \\
+
+		Check to see if systemd-networkd is controlling the adapter.
+			\begin{raw}
+# networkctl 
+WARNING: systemd-networkd is not running, output will be incomplete.
+
+IDX LINK             TYPE               OPERATIONAL SETUP     
+  1 lo               loopback           n/a         unmanaged 
+  2 eth0             ether              n/a         unmanaged 
+
+2 links listed.
+			\end{raw}
+
+		Notice the adapters are unmanaged.
+
+	\item
+		Check to see if NetworkManager is controlling the adapter.
+			\begin{raw}
+# nmcli 
+eth0: connected to Wired connection 1
+        "Red Hat Virtio network device"
+        ethernet (virtio_net), 52:54:00:B5:02:FF, hw, mtu 1500
+        ip4 default
+        inet4 192.168.122.112/24
+        route4 0.0.0.0/0
+        route4 192.168.122.0/24
+        inet6 fe80::3eff:1998:d47:16d8/64
+        route6 ff00::/8
+        route6 fe80::/64
+        route6 fe80::/64
+
+lo: unmanaged
+        "lo"
+        loopback (unknown), 00:00:00:00:00:00, sw, mtu 65536
+
+DNS configuration:
+        servers: 192.168.122.1
+        interface: eth0
+
+Use "nmcli device show" to get complete information about known devices and
+"nmcli connection show" to get an overview on active connection profiles.
+			\end{raw}
+
+	This example is using NetworkManager for the network management.
+
+	\item 
+	 Disable NetworkManager and check it is disabled.
+		\begin{raw} 
+# systemctl disable --now  NetworkManager 
+
+# nmcli 
+		\end{raw}
+	\item
+	Create a new configuration for systemd-networkd.
+		\begin{raw}
+# cat /etc/systemd/network/20-dhcp.network 
+[Match]
+Name=eth0
+
+[Network]
+DHCP=yes
+		\end{raw}
+
+	\item
+	Enable systemd-networkd and verify. 
+		\begin{raw}
+# systemctl enable --now systemd-networkd 
+		\end{raw}
+
+		\begin{raw}
+
+# networkctl 
+IDX LINK             TYPE               OPERATIONAL SETUP     
+  1 lo               loopback           carrier     unmanaged 
+  2 eth0             ether              routable    configuring
+
+2 links listed.
+		\end{raw}
+
+	Not quite ready yet.
+		\begin{raw}
+# networkctl 
+IDX LINK             TYPE               OPERATIONAL SETUP     
+  1 lo               loopback           carrier     unmanaged 
+  2 eth0             ether              routable    configured
+
+2 links listed.
+		\end{raw}
+
+	\end{enumerate}
+
+\end{exe}
+	
+
+
+\end{Lab}
+

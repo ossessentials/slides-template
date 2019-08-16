@@ -1,0 +1,48 @@
+\section{Introduction to systemd for Administrators}
+
+\begin{frame}
+   {Introduction}
+
+	This presentation will focus on the following \texttt{administration}
+	aspects of \textbf{systemd} including the following: 
+   \begin{itemize}
+	\item What is \textbf{systemd}
+	\item Getting your system services started
+	\item Configuration files/directories 
+	\item builtin and optional services 
+    \end{itemize}
+
+\end{frame}
+
+\cprotect\note{
+
+
+}
+
+\begin{frame} {history}
+
+        To start a Unix/Linux system we need an initialization program
+        to start the system environment. We also would like an easy
+        method to launch services both system and user
+        related. Several methods were used:
+
+        \begin{itemize}
+        \item An initialization program and one
+                big script running on the default shell
+        \item An initialization program and a bunch of little scripts
+        \item An initialization program and the old bunch of scripts
+                        with the beginnings of
+                        dependency processing.
+        \item An initialization program no scripts, just configuration files
+                with dependencies and sequencing available.
+        \end{itemize}
+
+
+\end{frame}
+
+\cprotect\note{
+
+
+}
+
+

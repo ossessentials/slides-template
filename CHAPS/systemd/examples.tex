@@ -1,0 +1,263 @@
+\section{systemd examples} 
+
+\begin{frame}
+	{systemd examples}
+ 
+	This section illustrates some examples of 
+	\textbf{systemd} configuration files. 
+\begin{itemize}
+                        \item   default configuration
+                        \item   customize a configuration 
+
+                        \item   systemd-timedated
+                        \item   systemd-delta
+                        \item   systemd-sysctl
+                \end{itemize}
+\end{frame} 
+
+\cprotect\note{ 
+
+}
+
+\begin{frame}
+	{default configuration}
+
+	Extract the list of files, looking for \textbf{systemd} 
+	configuration files. 
+
+\begin{raw}
+
+root@ubuntu:~# dpkg -L vsftpd  | grep systemd 
+
+/lib/systemd
+/lib/systemd/system
+/lib/systemd/system/vsftpd.service
+
+\end{raw}
+
+	In this package \textbf{vsftpd} the packager has added 
+	a \textbf{systemd} configuration file. \\
+
+	Notice the location of the config file. 
+
+\end{frame}
+
+\cprotect\note{
+
+
+}
+
+\begin{frame}
+	{default service config}
+
+	The contents of the default file: 
+
+	\begin{raw} 
+root@ubuntu:~# cat /lib/systemd/system/vsftpd.service
+
+[Unit]
+Description=vsftpd FTP server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/vsftpd /etc/vsftpd.conf
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStartPre=-/bin/mkdir -p /var/run/vsftpd/empty
+
+[Install]
+WantedBy=multi-user.target
+	\end{raw}
+
+
+
+\end{frame}
+
+\cprotect\note{
+
+
+}
+
+
+\begin{frame}
+	{customizing service file} 
+
+	If the packager supplied configuration file 
+	is modified it may get overwritten by a package
+	update. \\
+	There may be additional changes, so a configuration directory 
+	will be used. 
+
+	\begin{raw}
+root@ubuntu:~# mkdir -p /etc/systemd/system/vsftpd.service.d
+
+root@ubuntu:~# cat /etc/systemd/system/vsftpd.service.d/
+		00-vsftpd.conf 
+[Service]
+ExecStart=
+ExecStart=/usr/sbin/vsftpd /etc/vsftpd.conf -oftpd_banner="Whoo Hoo it works"
+
+root@ubuntu:~# systemctl daemon-reload 
+root@ubuntu:~# systemctl restart vsftpd 
+
+root@ubuntu:~# ftp localhost
+Connected to localhost.
+220 Whoo Hoo it works
+Name (localhost:student):
+
+	\end{raw}
+\end{frame} 
+
+\cprotect\note{
+
+	}
+
+\begin{frame}
+	{more complex configuration} 
+
+	The configuration file for vsftpd in 
+	\textbf{Fedora} is a little different. 
+
+	\begin{raw}
+[root@fedora ~]# rpm  -ql vsftpd | grep systemd
+/usr/lib/systemd/system-generators/vsftpd-generator
+/usr/lib/systemd/system/vsftpd.service
+/usr/lib/systemd/system/vsftpd.target
+/usr/lib/systemd/system/vsftpd@.service
+	\end{raw}
+
+	Notice the directory is slightly different. \textbf{systemd}
+	looks in both directories so it is a a choice.
+
+\end{frame}
+
+\cprotect\note{
+
+	}
+
+\begin{frame}
+	{no-frills service file}
+
+	One of the \textbf{service} files supplied with \textbf{vsftpd}
+	in \textbf{Fedora} is almost identical to the \textbf{Ubuntu}
+	counterpart. 
+
+	\begin{raw}
+[root@fedora ~]# cat /usr/lib/systemd/system/vsftpd.service
+[Unit]
+Description=Vsftpd ftp daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
+
+[Install]
+WantedBy=multi-user.target
+	\end{raw} 
+
+\end{frame}
+
+	\cprotect\note\ {
+
+	
+		
+	}
+		
+
+\begin{frame}
+		{some additional features} 
+
+		\begin{raw}
+[root@fedora ~]# cat /usr/lib/systemd/system/vsftpd@.service
+[Unit]
+Description=Vsftpd ftp daemon
+After=network.target
+PartOf=vsftpd.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/vsftpd /etc/vsftpd/%i.conf
+
+[Install]
+WantedBy=vsftpd.target
+		\end{raw}
+
+		Notice:
+		\begin{itemize}
+			\item
+		the \textbf{PartOf} option that connects this 
+		service file to the \textbf{vsftp.target}
+			\item
+		the @ in the name indicates this is a \textbf{template} 
+			\item
+		the \%i variable that contains the \textbf{instance} name.
+		\end{itemize}
+
+\end{frame}
+
+	\cprotect\note{
+		
+
+	}
+
+\begin{frame}
+	{using a generator}
+	
+	\begin{itemize}
+		\item \textbf{generators} are usually run very early in the 
+		initialize process to create or customize configuration 
+		files.
+	\end{itemize}
+
+	\begin{rawsmall}
+[root@fedora ~]# cat /usr/lib/systemd/system-generators/vsftpd-generator
+#!/usr/bin/bash
+
+confdir=/etc/vsftpd
+unitdir=/usr/lib/systemd/system
+targetdir=$1/vsftpd.target.wants
+
+mkdir -p ${targetdir}
+
+for f in $(ls -1 ${confdir}/*.conf | awk -F "." '{print $1}' | awk -F "/" '{print $4}')
+do
+  echo "Generating systemd units for $f"
+  ln -s ${unitdir}/vsftpd\@.service ${targetdir}/vsftpd\@$f.service > /dev/null 2>&1
+done
+
+exit 0
+	\end{rawsmall}
+See \textbf{man 7 systemd.generator} for more information.
+	
+\end{frame}
+
+\cprotect\note{
+	}
+
+\begin{frame}
+	{set up generator test}
+
+	\begin{enumerate}
+	\item shutdown vsftpd 
+	\item copy the config file \filelink{/etc/vsftpd/vsftpd.conf} to 
+		\filelink{/etc/vsftpd/blue.conf}
+	\item modify the port number in the new file
+	\item tell systemd
+		\begin{raw}
+	# systemctl --system daemon-reload
+		\end{raw}
+	\item start the vsftpd.target 
+	\item confirm the number of active ftp servers
+	\end{enumerate}
+
+\end{frame} 
+
+\cprotect\note{
+
+	}
+
+
+
+
+
