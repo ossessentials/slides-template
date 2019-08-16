@@ -4,20 +4,20 @@ Checkout the bottom of this README for any packages you may need to install to b
 
 Generally you can try these out with:
 
-* git clone https://github.com/e-ale/e-ale-common.git
-* git clone https://github.com/e-ale/e-ale-slide-template.git
-* cd e-ale-slide-template
+* git clone https://github.com/ossessentials/slides-common.git
+* git clone https://github.com/ossessentials/slides-template.git
+* cd slides-template
 * make slides
-* evince e-ale-slide-template-SLIDES.pdf
+* evince slides-template-SLIDES.pdf
 
 However to make your own set of slides do the following:
 
-* git clone https://github.com/e-ale/e-ale-common.git
-* git clone https://github.com/e-ale/e-ale-slide-template.git
-* mv e-ale-slide-template my-talk
+* git clone https://github.com/ossessentials/slides-common.git
+* git clone https://github.com/ossessentials/slides-template.git
+* mv slides-template my-talk
 * cd my-talk
-* mv e-ale-slide-template.tex my-talk.tex
-* sed -i 's/e-ale-slide-template/my-talk/g' my-talk.tex
+* mv slides-template.tex my-talk.tex
+* sed -i 's/slides-template/my-talk/g' my-talk.tex
 * make veryclean slides
 * evince my-talk-SLIDES.pdf
 
