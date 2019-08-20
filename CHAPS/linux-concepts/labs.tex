@@ -2,20 +2,143 @@
 
 \begin{exe} {Networking Basics}
 
-   Other than the kernel, name three components that can be
-   found in a \textbf{Linux} distribution.
+	\subsection*{Adding A New IP Address}
+   We will begin by documenting our network configuration. 
+	There are several tools your distribution could use
 
-
-      Most \textbf{Linux} distributions will contain a
-      \textbf{Linux} kernel along with:
       \begin{enumerate}
          \item
-         Tools for file-related operations, and user and
-         software package management.
+		 Open a terminal. Use the \textbf{ip} command
+		      to view your interfaces and addresses.
+		      Save it to a file for later reference.
+
          \item
-         A graphical environment (GUI).
+		 Determine if \verb:systemd-networkd: is running.
+
+	 \item
+		 Determine if \verb:Network Mangager: is 
+		      configuring you network.
+	      \item
+		      View flat file configuration. Your file 
+		      name may vary depending on your distribution.
+
          \item
-         Optional software packages.
+		 Use the \textbf{ip} command to add a new IP 
+		      Address to your primary interface. Your
+		      interface name may be different. Typically
+		      the interface listed after \verb:lo: in the
+		      \textbf{ip} output is your primary. Add the
+		      \verb:10.1.2.3: address.
+
+	      \item
+		      Use \textbf{ping} to test connection to the
+		      new address.
+	      \item
+		      View the \textbf{ip} details of the interface.
+		      Verify the new IP address has been added. Note
+		      it is not an alias, but an equal IP as the previous.
+
+	      \item
+		      View the route information with \textbf{ip route}.
+		      
+	      \item
+		      Add a new route to \verb:4.2.2.2: via \verb:10.1.2.1:
+		      and verify it it is shown in the \textbf{ip route}
+		      output.
+	      \item
+		      Use the \textbf{ifconfig -a} command to view
+		      your network settings.  Do you see the new,
+		      working IP Address?
+	      \item
+		      Remove the IP address. After it has been removed, 
+		      check to see if the routes have been removed as 
+		      well.
+
       \end{enumerate}
+
+	\subsection*{Changing Parameters}
+   In this section we will change the \verb:MTU: and view
+	the differences in performance. You can test between 
+	two VMs or instances, or between yourself and another
+	in class. For ease of use we will test against ourselves.
+	Be aware that other network traffic can
+	skew results. You may want to test mutliple times.
+	Also, some wifi drivers have a lower limit allowed. Your
+	interface particulars may be different. 
+	\begin{enumerate}
+		\item Verify the MTU of your primary interface 
+			is \verb:1500:/
+		\item Install the Flexible IO, or \textbf{fio}, package.
+			We will use this command to generate a 
+			known amount of traffic. 
+		\item
+			Use \textbf{fio} to test network transfer. 
+			Copy and paste the summary information to 
+			a temporary file or notepad. 
+		\item
+			Change the \verb:MTU: and run the test again.
+			Does the performance change as the \verb:MTU:
+			Changes.
+	\end{enumerate}
+
+\subsection*{Testing Name Services}
+    In this section we will test that we can resolve
+    IP addresses, both forward and reverse lookups.
+	        \begin{enumerate}
+                \item 
+			Use the \textbf{host} command to
+				view the IP information for
+				\verb:Linux.com:.
+			\item
+				Compare the output with what
+				you can see using the \textbf{nslookup} 
+				command.
+			\item
+				Use the \textbf{dig} command to view
+				all the DNS information about
+				\verb:Linux.com:. 
+			\item
+				View the name servers for the \verb:Linux.com:
+				network.
+			\item
+				Choose an IP from the output and use 
+				\textbf{dig} to resolve the name using the
+				IP address.
+			\item
+				Check your primary interface IP and determine
+				if a name is known. Check your route gateway
+				as well.
+        \end{enumerate}
+
+
+
+	        \subsection*{Monitoring Traffic}
+		In this section we will use commands to
+		view the network traffic.
+        \begin{enumerate}
+		\item Use \textbf{tcpdump} to view traffic
+			on your \verb:lo: interface. Use
+			\textbf{cont-C} to stop the command.
+			Then view traffic on your primary
+			interface.
+		\item
+			Use a filter to narrow down traffic to
+			only port 80, if there is any.
+		\item
+			Use \textbf{tcpdump} to save traffic
+			to a \verb:pcap: file.
+
+		\item
+			Install \textbf{Wireshark}. 
+		\item
+			Use \textbf{sudo} to start
+			\textbf{wireshark}.
+		\item
+			Filter for only SSH traffic. 
+		\item 
+			Experiment with \textbf{wireshark} as 
+			time allows.
+        \end{enumerate}
+
 \end{exe}
 \end{Lab}
