@@ -1,0 +1,158 @@
+\section{Interface Settings}
+
+\begin{frame}
+	{Configure the Interface}
+      \begin{itemize}
+	      \item \textbf{ip} command
+	      \item Edit flat files
+	      \item Configuration tools
+      \end{itemize}
+
+
+\end{frame}
+
+\cprotect\note{
+
+}
+\begin{frame}
+	{The \textbf{ip} Command}
+	\begin{raw}
+$ ip addr help
+Usage: ip address {add|change|replace} IFADDR dev IFNAME [ LIFETIME ]
+                                                      [ CONFFLAG-LIST ]
+       ip address del IFADDR dev IFNAME [mngtmpaddr]
+       ip address {save|flush} [ dev IFNAME ] [ scope SCOPE-ID ]
+                            [ to PREFIX ] [ FLAG-LIST ] [ label LABEL ] [up]
+       ip address [ show [ dev IFNAME ] [ scope SCOPE-ID ] [ master DEVICE ]
+                         [ type TYPE ] [ to PREFIX ] [ FLAG-LIST ]
+                         [ label LABEL ] [up] [ vrf NAME ] ]
+       ip address {showdump|restore}
+IFADDR := PREFIX | ADDR peer PREFIX
+          [ broadcast ADDR ] [ anycast ADDR ]
+          [ label IFNAME ] [ scope SCOPE-ID ]
+SCOPE-ID := [ host | link | global | NUMBER ]
+FLAG-LIST := [ FLAG-LIST ] FLAG
+	\end{raw}
+
+\end{frame}
+
+\cprotect\note{
+   The \textbf{ip} command has many subcommands and can configure
+   almost everything about your network interface. The 
+   changes made are not persistant. 
+}
+
+\begin{frame}
+	{\textbf{ip} Command (cont.)}
+	\begin{raw}
+FLAG  := [ permanent | dynamic | secondary | primary |
+           [-]tentative | [-]deprecated | [-]dadfailed | temporary |
+           CONFFLAG-LIST ]
+CONFFLAG-LIST := [ CONFFLAG-LIST ] CONFFLAG
+CONFFLAG  := [ home | nodad | mngtmpaddr | noprefixroute | autojoin ]
+LIFETIME := [ valid_lft LFT ] [ preferred_lft LFT ]
+LFT := forever | SECONDS
+TYPE := { vlan | veth | vcan | vxcan | dummy | ifb | macvlan | macvtap |
+          bridge | bond | ipoib | ip6tnl | ipip | sit | vxlan | lowpan |
+          gre | gretap | erspan | ip6gre | ip6gretap | ip6erspan | vti |
+          nlmon | can | bond_slave | ipvlan | geneve | bridge_slave |
+          hsr | macsec
+\end{raw}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+
+\begin{frame}
+   {Persistant configuration - Debian/Ubuntu}
+      \begin{itemize}
+         \item /etc/network/interfaces
+	 \item /etc/network/interfaces.d/*
+      \end{itemize}
+	\begin{raw}
+auto ens3
+iface ens3 inet static
+        address 192.168.4.12
+        netmask 255.255.255.0
+        gateway 192.168.4.1
+        dns-nameservers 8.8.8.8
+	\end{raw}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+   {Persistant configuration - Red Hat}
+      \begin{itemize}
+         \item /etc/sysconfig/network-scripts/ifcfg-eth0
+      \end{itemize}
+	\begin{raw}
+DEVICE=ens4
+BOOTPROTO=none
+ONBOOT=yes
+PREFIX=24
+IPADDR=192.168.2.4
+	\end{raw}
+
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+   {Network Manager}
+      \begin{itemize}
+	 \item nm-connection-editor
+	 \item nmtui
+         \item nmcli
+		 \begin{raw}
+$ nmcli connection show WorkNet
+connection.id:                          BWOceansidePalms
+connection.uuid:                        91733f17-40c3-4c91-b030-cde380715e54
+connection.stable-id:                   --
+connection.type:                        802-11-wireless
+....
+
+$ nmcli con mod WorkNet +ipv4.dns 4.2.2.2
+		 \end{raw}
+      \end{itemize}
+
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+
+\begin{frame}
+   {systemd-networkd}
+      \begin{itemize}
+         \item Attempt to standardize networking tools
+	 \item Lighter weight than NetworkManager
+	 \item Uses text files
+      \end{itemize}
+	\begin{raw}
+$ vim /etc/systemd/network/30-wireless.network
+[Match]
+Name=wlp1s0
+
+[Network]
+Address=192.168.8.3/24
+Gateway=192.168.8.1
+	\end{raw}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+

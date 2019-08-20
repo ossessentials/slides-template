@@ -1,0 +1,66 @@
+\section{Using Name Services}
+
+\begin{frame}
+   {Who Remembers Numbers}
+      \begin{itemize}
+	      \item The \file{/etc/hosts} file
+	 \item Domain Name Service
+	 \item Dynamic Host Configuration Protocol
+      \end{itemize}
+
+
+\end{frame}
+
+\cprotect\note{
+
+}
+\begin{frame}
+   {/etc/hosts}
+      \begin{itemize}
+         \item Local text file
+	 \item IP FQDN alias
+      \end{itemize}
+	\begin{raw}
+$ cat /etc/hosts
+127.0.0.1	localhost
+127.0.1.1	sys43.example.com.  sys43 loghost
+
+	\end{raw}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+\begin{frame}
+   {Domain Name Service}
+      \begin{itemize}
+         \item Distributed name control
+	 \item \textbf{BIND} most popular software
+	 \item References \file{/etc/resolv.conf} for nameserver
+	 \item Check with \textbf{nslookup}, \textbf{dig}, and \textbf{host}
+      \end{itemize}
+
+
+\end{frame}
+
+\cprotect\note{
+
+}
+\begin{frame}
+	{Dynamic Host Configuration Protocol}
+      \begin{itemize}
+         \item Asks for network configuration from others
+	 \item Access leased for period of time
+	 \item Use \textbf{dhclient} request to ask again
+		 \begin{raw}
+$ dhclient
+		 \end{raw}
+      \end{itemize}
+
+
+\end{frame}
+
+\cprotect\note{
+
+}
