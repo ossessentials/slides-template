@@ -1,0 +1,470 @@
+\section{Welcome}
+
+\begin{frame}
+        {Welcome}
+
+        Hi, I'm Lee Elston, your presenter for this session.
+
+        You can contact me at: \\
+        lee@matildasystems.com \\
+
+        I am a course maintainer and instructor for The Linux Foundation
+        and maintain: 
+
+        \begin{itemize}
+
+        \item LFS311
+        \item LFS430
+        \item LFS416
+        
+        \end{itemize}
+
+\end{frame}
+
+\cprotect\note{
+
+        }
+
+
+
+\section{history}
+
+\begin{frame}
+   {net-tools}
+   \begin{itemize}
+      	\item collection of tools for controlling network
+	\item in use since kernel version 2.0
+	\item most familiar networking commands 
+	\item uses procfs (/proc) and ioctl system call 
+   \end{itemize}
+
+	\textbf{net-tools} are getting a little old: 
+	\url{https://github.com/giftnuss/net-tools} last update 2010. 
+
+\end{frame}
+
+\cprotect\note{
+
+
+}
+
+
+\begin{frame}
+   {net-tools favorites}
+
+	\center{Some of our favorite \textbf{net-tools} utilities} 
+
+	\begin{longtable}{| m{5em} | m{20em} | }
+		\caption{most commonly used net-tools commands} \\
+		\hline  
+		\textbf{Command}			&
+		\textbf{Description} 			\\
+		\hline 
+		ifconfig				& 
+		display and modify interface 		\\ 
+		\hline
+		netstat					&
+		print information about the network 	\\ 
+		\hline
+
+	\end{longtable}
+
+
+\end{frame}
+
+\cprotect\note{
+	
+}
+
+\begin{frame}
+	{The complete list of net-tools:}
+
+	\begin{longtable}{| m{5em} | m{30em} | }
+                \caption{net-tools commands} \\
+                \hline
+                \textbf{Command}                        &
+                \textbf{Description}                    \\
+                \hline
+                ifconfig                                &
+                display and modify interface            \\
+                \hline
+                netstat                                 &
+                print information abut the network      \\
+                \hline
+		arp					&
+		print the arp table			\\
+		\hline
+		ether-wake				&
+		send magic "Wake-On-LAN" packet		\\
+		\hline
+		ipmaddr					&
+		add,delete,show multicast addresses 	\\
+		\hline 
+		iptunnel				&
+		add,delete,show a tunnel		\\
+		\hline
+		mii-daig				&
+		network adapter control and monitoring	\\
+		\hline
+		mii-tool				&
+		show,change interface status "Media Independent Interface (MII)	\\
+		\hline
+		nameif					&
+		rename an interface			\\
+		\hline
+		plipconfig				&
+		Parallel Line Internet Protocol (PLIP) 	\\
+		\hline
+		route					&
+		show,add,delete routes			\\
+		\hline
+		slattach				&
+		attach a network interface to a serial line \\
+		\hline
+
+        \end{longtable}
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{ifconfig} 
+	
+	\begin{itemize}
+	\item
+	most used networking command
+	\item 
+	similar command everywhere
+		\begin{itemize} 
+		\item Linux
+		\item Windows
+		\item OSX
+		\item Classic Unix and friends  
+		\end{itemize}
+	\item variations on the name 
+		\begin{itemize} 
+		\item ipconfig 
+		\item ifconfig 
+		\end{itemize}
+	\item variations on the output 
+	\item variations on command line options 
+
+	\end{itemize} 
+\end{frame}
+
+\cprotect\note { 
+}
+
+\begin{frame} 
+	{output of the ifconfig command}
+	\begin{raw}
+# ifconfig  wlp107s0 
+wlp107s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.0.7  netmask 255.255.255.0  broadcast 192.168.0.255
+        inet6 fe80::53b1:ef35:6e63:8bab  prefixlen 64  scopeid 0x20<link>
+        ether 50:5b:c2:d6:fa:f5  txqueuelen 1000  (Ethernet)
+        RX packets 819371  bytes 641332500 (641.3 MB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 547241  bytes 91562359 (91.5 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+	\end{raw}
+	
+\end{frame}
+
+\cprotect\note{ 
+}
+
+\begin{frame}
+	{netstat}
+	
+	\begin{itemize}
+	\item second most used networking command 
+	\item similar command everywhere
+		\begin{itemize}
+		\item Linux
+		\item Windows
+		\item OSX
+		\item Classic Unix and friends 
+		\end{itemize}
+	\item variations on the output
+	\item variations on command line options 
+
+	\end{itemize}
+\end{frame}
+
+\cprotect\note{ 
+
+}
+
+\begin{frame} 
+	{output of the netstat command}
+\begin{rawsmall}
+$ sudo netstat -4tapn 
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 192.168.0.7:53          0.0.0.0:*               LISTEN      1076/named          
+tcp        0      0 192.168.122.1:53        0.0.0.0:*               LISTEN      1076/named          
+tcp        0      0 10.50.0.1:53            0.0.0.0:*               LISTEN      1076/named          
+tcp        0      0 127.0.0.1:53            0.0.0.0:*               LISTEN      1076/named          
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      832/systemd-resolve 
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1087/sshd           
+tcp        0      0 0.0.0.0:25              0.0.0.0:*               LISTEN      2306/master         
+tcp        0      0 127.0.0.1:953           0.0.0.0:*               LISTEN      1076/named          
+tcp        0      0 0.0.0.0:445             0.0.0.0:*               LISTEN      2129/smbd           
+tcp        0      0 0.0.0.0:2049            0.0.0.0:*               LISTEN      -                   
+tcp        0      0 0.0.0.0:38657           0.0.0.0:*               LISTEN      1088/rpc.mountd     
+tcp        0      0 0.0.0.0:514             0.0.0.0:*               LISTEN      889/rsyslogd        
+tcp        0      0 0.0.0.0:111             0.0.0.0:*               LISTEN      1/init              
+tcp       32      0 192.168.0.7:35522       50.19.232.147:443       CLOSE_WAIT  2178/opera          
+tcp        0      0 192.168.0.7:55912       104.16.40.2:443         TIME_WAIT   -                   
+tcp        1      0 192.168.0.7:34522       66.228.47.22:443        CLOSE_WAIT  2178/opera          
+tcp        1      0 192.168.0.7:34512       66.228.47.22:443        CLOSE_WAIT  2178/opera          
+tcp       32      0 192.168.0.7:60100       107.167.110.216:443     CLOSE_WAIT  2178/opera          
+tcp        1      0 192.168.0.7:34510       66.228.47.22:443        CLOSE_WAIT  2178/opera          
+tcp        1      0 192.168.0.7:34524       66.228.47.22:443        CLOSE_WAIT  2178/opera          
+tcp        0      0 192.168.0.7:46868       172.217.13.202:443      TIME_WAIT   -                   
+\end{rawsmall}
+
+\end{frame}
+
+\cprotect\note{ 
+
+}
+
+\section{retirement}
+
+
+\begin{frame}
+	{and now  ......}
+
+	\center{\Huge retirement}
+
+\end{frame}
+
+\cprotect\note{
+
+
+}	
+
+\begin{frame} 
+	{new ideas, new tools} 
+
+	With the rapid change in Linux over the years, some 
+	utilities that seem to work are still around, especially the 
+	tools we all learned early on in our exposure to all the 
+	*ix environments. \\
+	So, here we are, nice new tools and we still prefer the old tools. 
+			\\ 
+	time to look at some alternatives.
+	
+\end{frame}
+
+\cprotect\note{
+
+	}
+
+\begin{frame}
+	{ifconfig vs ip} 
+	\begin{rawsmall}
+[root@rt ~]# ifconfig ens3
+ens3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.122.199  netmask 255.255.255.0  broadcast 192.168.122.255
+        inet6 fe80::5054:ff:fe0b:1cd6  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:0b:1c:d6  txqueuelen 1000  (Ethernet)
+        RX packets 132952  bytes 181326140 (172.9 MiB)
+        RX errors 0  dropped 8487  overruns 0  frame 0
+        TX packets 75972  bytes 5166820 (4.9 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+	\end{rawsmall}
+	\begin{rawsmall}
+[root@rt ~]# ip -s  a s  ens3
+2: ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:0b:1c:d6 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.199/24 brd 192.168.122.255 scope global dynamic ens3
+       valid_lft 2751sec preferred_lft 2751sec
+    inet6 fe80::5054:ff:fe0b:1cd6/64 scope link 
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast   
+    181342589  133196   0       8674    0       0       
+    TX: bytes  packets  errors  dropped carrier collsns 
+    5166820    75972    0       0       0       0   
+	\end{rawsmall}
+
+\end{frame}
+
+
+\cprotect\note{ 
+
+}
+
+\begin{frame}
+	{ip flags} 
+	One might notice that some additional flags were passed to the \textbf{ip}
+	command to make the output look similar to the \textbf{ifconfig} command. 
+
+
+	This comparison used \textbf{ifconfig} and \textbf{ip -s a s ens3}. \\
+	The options for the command \textbf{ip} are: 
+		\begin{itemize}
+			\item \textbf{-s}, print the link statistics 
+			\item \textbf{a}, for address
+			\item \textbf{s}, for show 
+			\item \textbf{ens3} is the interface
+		\end{itemize} 
+		Yes, it looks different. 
+\end{frame}
+
+\cprotect\note{
+
+}
+
+
+\begin{frame}
+	{ip listing interfaces} 
+
+	The \textbf{most} common use for \textbf{ifconfig} 
+	is to check: 
+	\begin{itemize}
+		\item what is the ip-address 
+		\item is the adapter up or down
+	\end{itemize}
+	How about a shortcut? \\
+		\begin{raw}
+[root@rt ~]# ip -br a
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+ens3             UP             192.168.122.199/24 fe80::5054:ff:fe0b:1cd6/64 
+		\end{raw}
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{additional command line options for ip}
+
+	This command uses the flag \textbf{-br} for "brief".\\
+	The option 
+	\textbf{-j} can be used to output the information in "json" format. 
+	Adding one more option \textbf{-p} "pretty" makes the json
+	output much easier to read. 
+
+	\begin{raw}
+[root@rt ~]# ip -br -j -p a s ens3
+[ {
+        "ifname": "ens3",
+        "operstate": "UP",
+        "addr_info": [ {
+                "local": "192.168.122.199",
+                "prefixlen": 24
+            },{
+                "local": "fe80::5054:ff:fe0b:1cd6",
+                "prefixlen": 64
+            } ]
+    } ]
+
+   	\end{raw}
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+   {netstat vs ss}
+	\textbf{netstat} 
+	\begin{itemize} 
+		\item From the "man" page: \\
+			Print network connections, 
+			routing tables, interface statistics, 
+			masquerade connections, and multicast memberships
+		\item Down a bit in that same "man" page: \\
+			This program is mostly obsolete.  
+			Replacement for netstat is ss.  
+	\end{itemize}
+	\textbf{ss}
+	\begin{itemize}
+		\item
+ 	ss  is used to dump socket statistics. 
+		\item
+	It allows showing information similar to netstat.
+		\item
+	It can display more TCP and state information than other tools.
+	\end{itemize}
+
+	
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{Some netstat replacements}
+	\begin{itemize}
+	\item Replacement for \textbf{netstat} is \textbf{ss}.  
+	\item Replacement for \textbf{netstat -r} is  \textbf{ip route} 
+	\item Replacement for \textbf{netstat -i} is \textbf{ip -s} link.
+	\item Replacement for \textbf{netstat -g} is \textbf{ip maddr}.
+
+	\end{itemize} 
+
+\end{frame}
+
+\cprotect\note{
+}
+
+
+\begin{frame}
+	{ss features} 
+	
+	The \textbf{ss} program dumps socket statistics. 
+	\begin{itemize} 
+	\item output is \texttt{similar} to \textbf{netstat}
+	\item displays more state information than \textbf{netstat}
+	\item displays more \textbf{TCP} information than \textbf{netstat}
+	\end{itemize} 
+
+	Many of the options for \textbf{ss} are very 
+	similar to \textbf{netstat}.As an example:
+	\begin{raw} 
+# ss -tuln 
+	\end{raw} 
+	and
+	\begin{raw} 
+# nestat -tuln 
+	\end{raw} 
+	
+
+\end{frame}
+
+\cprotect\note{
+
+}
+
+\begin{frame}
+	{compare ss and netstat output} 
+	These two commands output almost exactly the same data. 
+	\begin{raw}
+[root@rt ~]# ss  -ltn4 
+State       Recv-Q      Send-Q      Local Address:Port       Peer Address:Port     
+LISTEN      0           128               0.0.0.0:5355            0.0.0.0:*        
+LISTEN      0           128               0.0.0.0:22              0.0.0.0:*        
+LISTEN      0           5               127.0.0.1:631             0.0.0.0:*        
+LISTEN      0           100               0.0.0.0:25              0.0.0.0:*        
+
+[root@rt ~]# netstat  -ltn4 
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+tcp        0      0 0.0.0.0:5355            0.0.0.0:*               LISTEN     
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN     
+tcp        0      0 127.0.0.1:631           0.0.0.0:*               LISTEN     
+tcp        0      0 0.0.0.0:25              0.0.0.0:*               LISTEN 
+	\end{raw} 
+\end{frame}
+\cprotect\note{
+	}

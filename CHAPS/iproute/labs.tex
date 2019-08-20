@@ -1,0 +1,287 @@
+\clearpage\section{Labs}\begin{Lab}
+
+	\begin{exe} {Verify system is ready for experimenting with ip and ss} 
+
+	Confirm that both \textbf{net-tools} and \textbf{iproute} are installed. 
+
+
+   \begin{sol}
+      \begin{enumerate}
+	  \item Install required packages:		      
+         \begin{itemize}
+            \item
+            On \textbf{CentOS7}:
+            \begin{raw}
+# yum install iproute iproute-tc net-tools  
+	    \end{raw}
+            \item
+            On \textbf{OpenSUSE}:
+            \begin{raw}
+# zypper install net-tools-deprecated net-tools iproute2  
+            \end{raw}
+            \item
+            On \textbf{Ubuntu}:
+            \begin{raw}
+# apt-get install net-tools iproute2  
+            \end{raw}
+         \end{itemize}
+
+         \item
+	Note: the different commands on different distributions may have or 
+		      require different security for access. Please use \textbf{root} 
+		      level access. \\
+
+         Verify the following commands are present and functioning.
+
+
+         \begin{raw}
+# ip 
+# ifconfig 
+# netstat 
+# ss 
+	 \end{raw}
+
+	\item 
+		Take a closer look at the output from \textbf{ip} in comparison to 
+		      ifconfig. Look at the contents of \textbf{ifconfig} for any
+		      adapter except \textbf{lo} : 
+	\begin{raw}
+root@ubuntu:~# ifconfig enp1s0
+enp1s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.122.42  netmask 255.255.255.0  broadcast 192.168.122.255
+        inet6 fe80::5054:ff:fe2a:1b3d  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:2a:1b:3d  txqueuelen 1000  (Ethernet)
+        RX packets 115179  bytes 125395460 (125.3 MB)
+        RX errors 0  dropped 28478  overruns 0  frame 0
+        TX packets 43973  bytes 3503100 (3.5 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+	\end{raw}
+		This is the most common display used to look at the ip-address of an network adapter.\\ 
+		      The default output of \textbf{ip} is quite different. To use the \textbf{ip}
+		      command on a single adapter is requires some more execution flags, \\ 
+		      \textbf{ip address show link-name} or a shorter version: \\ 
+		      \textbf{ip add sh link-name} or even: \\
+		      \textbf{ip a s link-name} \\ 
+		      Display the default information of an adapter using \textbf{ip}:
+	\begin{raw}
+# ip a s  enp1s0
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:2a:1b:3d brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.42/24 brd 192.168.122.255 scope global dynamic enp1s0
+       valid_lft 3294sec preferred_lft 3294sec
+    inet6 fe80::5054:ff:fe2a:1b3d/64 scope link 
+       valid_lft forever preferred_lft forever
+	\end{raw}
+	
+	\item 
+		Comparing the output from the two commands we see immediately 
+		that the \textbf{byte} and \textbf{packet} counters are missing. \\
+		Add the adapter statistics into the \textbf{ip} command with the 
+		option \textbf{-s} : 
+	\begin{raw}
+root@ubuntu:~# ip -s a s  enp1s0
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:2a:1b:3d brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.42/24 brd 192.168.122.255 scope global dynamic enp1s0
+       valid_lft 2069sec preferred_lft 2069sec
+    inet6 fe80::5054:ff:fe2a:1b3d/64 scope link 
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast   
+    125642456  116866   0       29262   0       0       
+    TX: bytes  packets  errors  dropped carrier collsns 
+    3641594    44499    0       0       0       0   
+		\end{raw} 
+
+	\item 
+	Notice that now the \textbf{ip} command displays 
+	nearly exactly the same, plus a little more, 
+	information than the old \textbf{ifconfig} command. \\
+	The \textbf{ip} command also shows the \textbf{valid\_lft} and
+	\textbf{preferred\_lft} which are the "life time" timers the 
+	kernel uses, when they hit zero the address is removed. 
+	(see RFC4862 for more information) 
+
+
+      \end{enumerate}
+
+   \end{sol}
+
+\end{exe}
+
+\begin{exe} {Display an incompatibility between "ip" and "ifconfig"}
+
+	The way that ip-aliases are handled has changed and since 
+	\textbf{ifconfig} has not been updated for many years 
+	there is a potential issue.  \\
+	Explore using \textbf{ifconfig} and \textbf{ip}
+	to create and display \textbf{ip-aliases}. 
+
+		
+	\begin{sol}
+	
+		\begin{enumerate}
+		\item 
+		Create two aliases on the primary adapter, not the loopback,
+			one using \textbf{ifconfig} and one 
+			using \textbf{ip}.  \\
+			Locate the adapter.
+
+			\begin{raw}
+root@ubuntu:~# ip -br a
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+enp1s0           UP             192.168.122.42/24 fe80::5054:ff:fe2a:1b3d/64
+			\end{raw}
+		\item 
+			Add an alias using \textbf{ifconfig} 
+			\begin{raw}
+root@ubuntu:~# ifconfig enp1s0:1 172.16.42.1 up
+			\end{raw} 
+		\item   Add an alias using \textbf{ip}
+			\begin{raw}
+root@ubuntu:~# ip addr add 172.16.44.1/24 dev enp1s0
+			\end{raw}
+		\item 
+			Use the \textbf{ip} command to view all the adapters 
+			\begin{raw}
+root@ubuntu:~# ip -s a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast   
+    141300     1379     0       0       0       0       
+    TX: bytes  packets  errors  dropped carrier collsns 
+    141300     1379     0       0       0       0       
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:2a:1b:3d brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.42/24 brd 192.168.122.255 scope global dynamic enp1s0
+       valid_lft 3285sec preferred_lft 3285sec
+    inet 172.16.42.1/16 brd 172.16.255.255 scope global enp1s0:1
+       valid_lft forever preferred_lft forever
+    inet 172.16.44.1/24 scope global enp1s0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5054:ff:fe2a:1b3d/64 scope link 
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast   
+    126045077  119897   0       31128   0       0       
+    TX: bytes  packets  errors  dropped carrier collsns 
+    3718401    45030    0       0       0       0       
+			\end{raw}
+			Notice that both of the aliases 
+				are listed in the output. 
+
+		\item Use \textbf{ifconfig} to view all the adapters. 
+			\begin{raw}
+root@ubuntu:~# ifconfig 
+enp1s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.122.42  netmask 255.255.255.0  broadcast 192.168.122.255
+        inet6 fe80::5054:ff:fe2a:1b3d  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:2a:1b:3d  txqueuelen 1000  (Ethernet)
+        RX packets 120027  bytes 126053820 (126.0 MB)
+        RX errors 0  dropped 31216  overruns 0  frame 0
+        TX packets 45039  bytes 3719025 (3.7 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+enp1s0:1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.16.42.1  netmask 255.255.0.0  broadcast 172.16.255.255
+        ether 52:54:00:2a:1b:3d  txqueuelen 1000  (Ethernet)
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 1379  bytes 141300 (141.3 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 1379  bytes 141300 (141.3 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+			\end{raw}
+
+			Notice the alias \textbf{172.16.44.1} is missing. 
+		\end{enumerate}
+
+	\end{sol}
+\end{exe}
+
+\begin{exe}
+	{Some ss examples}
+		
+	Using the \textbf{man ss} as a reference, experiment with 
+	the commands as shown and others more specific to your interest. 
+
+	\begin{enumerate}
+		\item
+		Display all TCPv4 sockets.
+			\begin{raw}
+
+ss -t -a -4 
+			
+# ss -ta4
+State   Recv-Q    Send-Q        Local Address:Port         Peer Address:Port    
+LISTEN  0         100                 0.0.0.0:imaps             0.0.0.0:*       
+LISTEN  0         64                  0.0.0.0:nfs               0.0.0.0:*       
+LISTEN  0         128                 0.0.0.0:37089             0.0.0.0:*       
+LISTEN  0         128                 0.0.0.0:36353             0.0.0.0:*       
+LISTEN  0         100                 0.0.0.0:pop3s             0.0.0.0:*       
+LISTEN  0         100                 0.0.0.0:pop3              0.0.0.0:*       
+LISTEN  0         100                 0.0.0.0:imap2             0.0.0.0:*       
+LISTEN  0         128                 0.0.0.0:48431             0.0.0.0:*       
+LISTEN  0         128                 0.0.0.0:sunrpc            0.0.0.0:*       
+LISTEN  0         128           127.0.0.53%lo:domain            0.0.0.0:*       
+LISTEN  0         128                 0.0.0.0:ssh               0.0.0.0:*       
+LISTEN  0         5                 127.0.0.1:ipp               0.0.0.0:*       
+LISTEN  0         100                 0.0.0.0:smtp              0.0.0.0:*       
+LISTEN  0         64                  0.0.0.0:38335             0.0.0.0:*       
+ESTAB   0         0                 127.0.0.1:37604           127.0.0.1:ssh     
+ESTAB   0         0                 127.0.0.1:ssh             127.0.0.1:37604   
+
+			\end{raw}
+
+		
+		\item 
+		Display all ipv4 UDP sockets
+			\begin{raw}
+ss -ua4
+State  Recv-Q   Send-Q              Local Address:Port       Peer Address:Port  
+UNCONN 0        0                         0.0.0.0:40477           0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:ipp             0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:54961           0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:39620           0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:35662           0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:nfs             0.0.0.0:*     
+UNCONN 0        0                   127.0.0.53%lo:domain          0.0.0.0:*     
+UNCONN 0        0           192.168.122.42%enp1s0:bootpc          0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:sunrpc          0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:mdns            0.0.0.0:*     
+UNCONN 0        0                         0.0.0.0:50559           0.0.0.0:*     
+			\end{raw}
+
+		\item 
+		Display all the \textbf{established} connections that have a source 
+		or destination on port 21 (ssh) 
+			\begin{raw}
+# ss -o state established '( dport = :ssh or sport = :ssh )'
+Netid  Recv-Q    Send-Q        Local Address:Port        Peer Address:Port                                  
+tcp    0         0                 127.0.0.1:37604          127.0.0.1:ssh      timer:(keepalive,104min,0)   
+tcp    0         0                 127.0.0.1:ssh            127.0.0.1:37604    timer:(keepalive,104min,0)   
+			\end{raw}
+				
+		\item
+		An active web server is required for this example. 
+		This example shows packet with status \textbf{time-wait}, destination port of 
+		\textbf{http} or \textbf{https} and destination \textbf{ip network}. 
+			\begin{raw}
+
+# ss -t -o state time-wait '( dport = :http or dport = :https )' dst 192.168.122/24
+Recv-Q  Send-Q       Local Address:Port          Peer Address:Port                               
+0       0           192.168.122.42:49460       192.168.122.42:http    timer:(timewait,54sec,0)   
+0       0           192.168.122.42:49466       192.168.122.42:http    timer:(timewait,56sec,0)   
+0       0           192.168.122.42:49464       192.168.122.42:http    timer:(timewait,55sec,0)   
+0       0           192.168.122.42:49462       192.168.122.42:http    timer:(timewait,54sec,0)   
+			\end{raw}
+		\end{enumerate}
+	\end{exe}
+
+\end{Lab}
+
