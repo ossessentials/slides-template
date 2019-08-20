@@ -146,14 +146,14 @@ Aug 12 10:50:24 rt.example.com systemd[1]: Started test.
 	\textbf{local admin} directory \textbf{/etc/systemd/system}. 
 	One of the advantages of using the local admin directory is 
 	changes to the service file added by the vendor or 
-	packager could be made during update, overwritten local customizations.
+	packager could be made during update, overwritten local customization.
 
 	\begin{enumerate} 
 		\item
 		A Drop-In file can be a single file or a directory 
 			of many files, this 
 			example uses a directory.
-		Create the new directory for the dropin file.
+		Create the new directory for the drop-in file.
 		\begin{raw}
 # mkdir /etc/systemd/system/test_sshd.service
 		\end{raw}
@@ -162,7 +162,7 @@ Aug 12 10:50:24 rt.example.com systemd[1]: Started test.
 		The Drop-In file will add to the existing service file. Sometimes 
 			if a value is already defined it must be cleared before 
 			changes can occur, the actual ExecStart command is one. Create 
-			dropin file with the following. The port number was changed. 
+			drop-in file with the following. The port number was changed. 
 
 		\begin{raw}
 # cat /etc/systemd/system/test_sshd.service.d/00-first.conf
@@ -206,7 +206,7 @@ Aug 12 11:28:32 rt.example.com systemd[1]: Started test.
 		\end{exe}
 
 
-\begin{exe}{Locating the customizations}
+\begin{exe}{Locating the customization's}
 	This exercise looks at determining which configuration 
 	files are active for a \textbf{systemd unit}. This exercise assumes 
 	the successful completion of the previous exercises. 
